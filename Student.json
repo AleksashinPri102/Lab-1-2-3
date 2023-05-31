@@ -1,0 +1,14 @@
+{
+  "name": "Student",
+  "columns": [
+    {
+      "name": "id",
+      "type": "int",
+      "isPrimary": true
+    },
+    {
+      "name": "Name",
+      "type": "string"
+    }
+  ]
+}
