@@ -1,112 +1,78 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Dummy_Db
 {
-    public static class CsvParser
+    static class CsvParser
     {
-        public static List<StudentsBook> ParseStudentsBook(List<StudentsBook> studentsBook)
+        public static List<StudentWithBook> ParseStudentWithBook(string studentsWithBookPath, List<StudentWithBook> studentsWithBook)
         {
-            int count = default;
-            foreach (string line in File.ReadLines("studentsBook.csv"))
+            int expectedCount = 4;
+            var lines = File.ReadLines(studentsWithBookPath).ToArray();
+            for (int i = 1; i < lines.Length; i++)
             {
-                if (count == 0)
-                {
-                    count++;
-                    continue;
-                }
-                string[] cell = line.Split(";");
-                if (cell.Length == 4)
-                {
-                    StudentsBook studentBook = new();
-                    if (int.TryParse(cell[0], out int value))
-                        studentBook.BookId = value;
-                    else
-                        throw new Exception($"error: Id книги в файле studentsBook.csv в  {count} строке должен быть целым числом");
-                    if (int.TryParse(cell[1], out value))
-                        studentBook.StudentId = value;
-                    else
-                        throw new Exception($"error: Id человека в файле studentsBook.csv в  {count} строке должен быть целым числом");
-                    studentBook.DateOfGetting = DateTime.Parse(cell[2]);
-                    studentBook.DateOfReturning = DateTime.Parse(cell[3]);
-                    if (studentBook.DateOfGetting > studentBook.DateOfReturning)
-                        throw new Exception($"error: в файле studentsBook.csv в  {count} строке дата взятия книги не может быть позже даты возвращения");
-                    studentsBook.Add(studentBook);
-                    count++;
-                }
-                else
-                    throw new Exception($"error: Количество данных в {count} строке файла studentsBook.csv должно быть равно 4");
+                string[] splitted = lines[i].Split(";");
+                CheckInequality(splitted.Length, studentsWithBookPath, expectedCount);
+                StudentWithBook studentWithBook = new();
+                studentWithBook.BookId = ValueTryParse(i, splitted[0], studentsWithBookPath);
+                studentWithBook.PersonId = ValueTryParse(i, splitted[1], studentsWithBookPath);
+                studentWithBook.DateOfGetting = DateTime.Parse(splitted[2]);
+                studentWithBook.DateOfReturn = DateTime.Parse(splitted[3]);
+                studentsWithBook.Add(studentWithBook);
             }
-            return studentsBook;
+
+            return studentsWithBook;
         }
-        public static List<Student> ParseStudent(List<Student> students)
+        public static List<Student> ParseStudent(string studentPath, List<Student> students)
         {
-            int count = default;
-            foreach (string line in File.ReadLines("student.csv"))
+            int expectedCount = 2;
+            var lines = File.ReadLines(studentPath).ToArray();
+            for (int i = 1; i < lines.Length; i++)
             {
-                if (count == 0)
-                {
-                    count++;
-                    continue;
-                }
-                string[] cell = line.Split(";");
-                if (cell.Length == 2)
-                {
-                    Student student = new();
-                    if (int.TryParse(cell[0], out int value))
-                        student.Id = value;
-                    else
-                        throw new Exception($"error: Id в файле student.csv  в {count} строке должен быть целым числом");
-                    student.Name = cell[1];
-                    students.Add(student);
-                }
-                else if (cell.Length != 2)
-                    throw new Exception($"error: Количество данных в {count} строке файла student.csv должно быть равно 2");
-                count++;
+                string[] splitted = lines[i].Split(";");
+                CheckInequality(splitted.Length, studentPath, expectedCount);
+                Student student = new();
+                student.Id = ValueTryParse(i, splitted[0], studentPath);
+                student.ReaderName = splitted[1];
+                students.Add(student);
             }
+
             return students;
         }
 
-        public static List<Book> ParseBook(List<Book> books)
+        public static List<Book> ParseBook(string booksPath, List<Book> books)
         {
-            int count = default;
-            foreach (string line in File.ReadLines("book.csv"))
+            int expectedCount = 6;
+            var lines = File.ReadLines(booksPath).ToArray();
+            for (int i = 1; i < lines.Length; i++)
             {
-                if (count == 0)
-                {
-                    count++;
-                    continue;
-                }
-                string[] cell = line.Split(";");
-                if (cell.Length == 6)
-                {
-                    Book book = new();
-                    if (int.TryParse(cell[0], out int value))
-                        book.Id = value;
-                    else
-                        throw new Exception($"error: Id в файле book.csv  в {count} строке должен быть целым числом");
-                    book.Name = cell[1];
-                    book.AuthorName = cell[2];
-                    if (int.TryParse(cell[3], out value))
-                        book.YearOfPublication = value;
-                    else
-                        throw new Exception($"Год публикации в файле book.csv  в {count} строке должен быть целым числом");
-                    if (int.TryParse(cell[4], out value))
-                        book.Case = value;
-                    else
-                        throw new Exception($"error: номер шкафа в файле book.csv  в {count} строке должен быть целым числом");
-                    if (int.TryParse(cell[5], out value))
-                        book.Shelf = value;
-                    else
-                        throw new Exception($"error: номер полки в файле book.csv  в {count} строке должен быть целым числом");
-                    books.Add(book);
-                }
-                else 
-                    throw new Exception($"error: Количество данных в {count} строке файла book.csv должно быть равно 6");
-                count++;
+                string[] splitted = lines[i].Split(";");
+                CheckInequality(splitted.Length, booksPath, expectedCount);
+                Book book = new();
+                book.Id = ValueTryParse(i, splitted[0], booksPath);
+                book.Name = splitted[1];
+                book.AuthorName = splitted[2];
+                book.YearOfPublication = ValueTryParse(i, splitted[3], booksPath);
+                book.Case = ValueTryParse(i, splitted[4], booksPath);
+                book.Shelf = ValueTryParse(i, splitted[5], booksPath);
+                books.Add(book);
             }
+
             return books;
+        }
+        public static int ValueTryParse(int i, string data, string path)
+        {
+            if (!int.TryParse(data, out int value))
+                throw new Exception($"Данные в файле {path}  в {i} строке должен быть целым числом");
+            return value;
+        }
+
+        public static void CheckInequality(int actualCount, string path, int expectedCount)
+        {
+            if (actualCount != expectedCount)
+                throw new Exception($"error: Количество данных в каждой строке файла {path} должно быть равно {expectedCount}");
         }
     }
 }
