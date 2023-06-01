@@ -1,20 +1,26 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Dummy_Db
 {
-    class Program
+    class Programm
     {
-        static void Main(string[] args)
+        static void Main()
         {
+            string projectPath = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName!;
+            string studentPath = string.Concat(projectPath, "\\Student.csv");
+            string booksPath = string.Concat(projectPath, "\\Book.csv");
+            string studentsWithBookPath = string.Concat(projectPath, "\\StudentsWithBook.csv");
+
             List<Student> students = new();
             List<Book> books = new();
-            List<StudentsBook> studentsBook = new();
+            List<StudentWithBook> studentsWithBook = new();
 
-            studentsBook = CsvParser.ParseStudentsBook(studentsBook);
-            students = CsvParser.ParseStudent(students);
-            books = CsvParser.ParseBook(books);
+            studentsWithBook = CsvParser.ParseStudentWithBook(studentsWithBookPath, studentsWithBook);
+            students = CsvParser.ParseStudent(studentPath, students);
+            books = CsvParser.ParseBook(booksPath, books);
 
-            WriterTable.WriteTable(studentsBook, books, students);
+            WriterTable.WriteTable(studentsWithBook, books, students);
         }
     }
 }
