@@ -62,14 +62,14 @@ namespace Dummy_Db
 
             return books;
         }
-        public static int ValueTryParse(int i, string data, string path)
+        static int ValueTryParse(int i, string data, string path)
         {
             if (!int.TryParse(data, out int value))
                 throw new Exception($"Данные в файле {path}  в {i} строке должен быть целым числом");
             return value;
         }
 
-        public static void CheckInequality(int actualCount, string path, int expectedCount)
+        static void CheckInequality(int actualCount, string path, int expectedCount)
         {
             if (actualCount != expectedCount)
                 throw new Exception($"error: Количество данных в каждой строке файла {path} должно быть равно {expectedCount}");
